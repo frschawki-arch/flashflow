@@ -290,46 +290,50 @@ export default function OrderFormSection() {
   };
 
 const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!validate()) return;
-  setLoading(true);
+    e.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
 
- // إرسال البيانات الحقيقية المخزنة في form
-  try {
-    await fetch('https://formspree.io/f/mdabanbl', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: form.name,
-        phone: form.phone,
-        wilaya: form.wilaya,
-        quantity: form.quantity
-      })
-    });
-  } catch (error) {
-    console.error('Error sending order:', error);
-  }
+    try {
+      const response = await fetch('https://formspree.io/f/mdabanbl', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          wilaya: form.wilaya,
+          quantity: form.quantity
+        })
+      });
 
-  // إكمال الخطوات المعتادة للموقع بعد الإرسال
-  setTimeout(() => {
-    const id = 'STA-' + Math.floor(100000 + Math.random() * 900000);
-    const today = new Date();
-    const minDays = 3;
-    const maxDays = 5;
-    const minDate = new Date(today);
-    minDate.setDate(today.getDate() + minDays);
-    const maxDate = new Date(today);
-    maxDate.setDate(today.getDate() + maxDays);
-    const formatDate = (d: Date) =>
-      d.toLocaleDateString('ar-DZ', { day: 'numeric', month: 'numeric' });
-    setOrderId(id);
-    setDeliveryDate(`${formatDate(minDate)} - ${formatDate(maxDate)}`);
-    setLoading(false);
-    setSubmitted(true);
-  }, 1500);
+      if (response.ok) {
+        // حساب تاريخ التوصيل المتوقع
+        const id = 'STA-' + Math.floor(100000 + Math.random() * 900000);
+        const today = new Date();
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() + 3);
+        const maxDate = new Date(today);
+        maxDate.setDate(today.getDate() + 5);
+        const formatDate = (d: Date) =>
+          d.toLocaleDateString('ar-DZ', { day: 'numeric', month: 'numeric' });
+
+        setOrderId(id);
+        setDeliveryDate(`${formatDate(minDate)} - ${formatDate(maxDate)}`);
+        setLoading(false);
+        setSubmitted(true);
+      } else {
+        alert('حدث خطأ في الشبكة، يرجى المحاولة لاحقاً.');
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error sending order:', error);
+      alert('فشل في إرسال الطلب، يرجى التحقق من الاتصال.');
+      setLoading(false);
+    }
+  };
 };
 
   const handleChange = (field: keyof FormData, value: string) => {
