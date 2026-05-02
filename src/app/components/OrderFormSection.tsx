@@ -289,29 +289,42 @@ export default function OrderFormSection() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
-    // Backend integration point — connect to order management API here
-    setTimeout(() => {
-      // Generate order ID and estimated delivery date
-      const id = 'STA-' + Math.floor(100000 + Math.random() * 900000);
-      const today = new Date();
-      const minDays = 3;
-      const maxDays = 5;
-      const minDate = new Date(today);
-      minDate.setDate(today.getDate() + minDays);
-      const maxDate = new Date(today);
-      maxDate.setDate(today.getDate() + maxDays);
-      const formatDate = (d: Date) =>
-        d.toLocaleDateString('ar-DZ', { day: 'numeric', month: 'long', year: 'numeric' });
-      setOrderId(id);
-      setDeliveryDate(`${formatDate(minDate)} — ${formatDate(maxDate)}`);
-      setLoading(false);
-      setSubmitted(true);
-    }, 1500);
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
+
+  // إرسال البيانات إلى Formspree
+  try {
+    await fetch('https://formspree.io/f/mdabanbl', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(form)
+    });
+  } catch (error) {
+    console.error('Error sending order:', error);
+  }
+
+  // إكمال الخطوات المعتادة للموقع بعد الإرسال
+  setTimeout(() => {
+    const id = 'STA-' + Math.floor(100000 + Math.random() * 900000);
+    const today = new Date();
+    const minDays = 3;
+    const maxDays = 5;
+    const minDate = new Date(today);
+    minDate.setDate(today.getDate() + minDays);
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + maxDays);
+    const formatDate = (d: Date) =>
+      d.toLocaleDateString('ar-DZ', { day: 'numeric', month: 'numeric' });
+    setOrderId(id);
+    setDeliveryDate(`${formatDate(minDate)} - ${formatDate(maxDate)}`);
+    setLoading(false);
+    setSubmitted(true);
+  }, 1500);
+};
 
   const handleChange = (field: keyof FormData, value: string) => {
     const parsed = field === 'quantity' ? parseInt(value, 10) || 1 : value;
