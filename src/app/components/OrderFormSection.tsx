@@ -301,7 +301,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(form)
+     body: JSON.stringify(formData)
     });
   } catch (error) {
     console.error('Error sending order:', error);
