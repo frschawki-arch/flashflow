@@ -294,14 +294,20 @@ const handleSubmit = async (e: React.FormEvent) => {
   if (!validate()) return;
   setLoading(true);
 
-  // إرسال البيانات إلى Formspree
+ // إرسال البيانات الحقيقية المخزنة في form
   try {
     await fetch('https://formspree.io/f/mdabanbl', {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-     body: JSON.stringify(formData)
+      body: JSON.stringify({
+        name: form.name,
+        phone: form.phone,
+        wilaya: form.wilaya,
+        quantity: form.quantity
+      })
     });
   } catch (error) {
     console.error('Error sending order:', error);
